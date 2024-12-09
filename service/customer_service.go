@@ -43,7 +43,7 @@ func NewCustomerPayload(customers repository.Customer) CreateCustomersResponse {
 func (service *CustomerServiceImpl) GetCustomer(ctx context.Context, arg string) (repository.Customer, error) {
 	payload, err := service.q.GetCustomers(ctx, arg)
 	if err != nil {
-		return repository.Customer{}, exception.NewNotFoundError(err.Error())
+		return repository.Customer{}, err
 	}
 
 	return payload, nil
@@ -61,4 +61,18 @@ func (service *CustomerServiceImpl) CreateCustomers(ctx context.Context, arg rep
 	}
 
 	return NewCustomerPayload(payload), nil
+}
+
+func (service *CustomerServiceImpl) CreateSession(ctx context.Context, arg repository.CreateSessionParams) (repository.Session, error) {
+	err := service.q.CreateSession(ctx, arg)
+	if err != nil {
+		return repository.Session{}, err
+	}
+
+	payload, err := service.q.GetSession(ctx, arg.ID)
+	if err != nil {
+		return repository.Session{}, err
+	}
+	return payload, nil
+
 }

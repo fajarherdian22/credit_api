@@ -10,9 +10,11 @@ import (
 
 type Querier interface {
 	CreateCustomers(ctx context.Context, arg CreateCustomersParams) error
+	CreateSession(ctx context.Context, arg CreateSessionParams) error
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) error
-	GetCustomers(ctx context.Context, id string) (Customer, error)
+	GetCustomers(ctx context.Context, email string) (Customer, error)
 	GetLimit(ctx context.Context, arg GetLimitParams) (float64, error)
+	GetSession(ctx context.Context, id string) (Session, error)
 	GetTransaction(ctx context.Context, id string) (Transaction, error)
 }
 

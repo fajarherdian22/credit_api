@@ -36,6 +36,18 @@ type PaymentDetail struct {
 	PaymentTime   time.Time `json:"payment_time"`
 }
 
+type Session struct {
+	ID           string    `json:"id"`
+	Email        string    `json:"email"`
+	CustomerID   string    `json:"customer_id"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
 type Transaction struct {
 	ID            string    `json:"id"`
 	CustomerID    string    `json:"customer_id"`

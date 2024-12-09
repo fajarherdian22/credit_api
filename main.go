@@ -38,14 +38,13 @@ func main() {
 	router := gin.New()
 
 	r := router.Group("/api/")
-
-	// Endpoint tanpa proteksi
 	r.POST("/customers/create", custController.CreateCustomersUser)
 	r.POST("/customers/login", custController.LoginCustomers)
-
 	authGroup := r.Group("/")
+
 	authGroup.Use(middleware.AuthMiddleware(tokenMaker))
 	authGroup.POST("/customers/transaction", transactionController.CreateTransaction)
+	authGroup.GET("/customers/listtx", transactionController.ListTx)
 
 	err = router.Run(":8080")
 	if err != nil {

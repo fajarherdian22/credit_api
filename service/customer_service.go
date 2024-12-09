@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/fajarherdian22/credit_bank/exception"
@@ -41,37 +42,43 @@ func NewCustomerPayload(customers repository.Customer) CreateCustomersResponse {
 }
 
 func (service *CustomerServiceImpl) GetCustomer(ctx context.Context, arg string) (repository.Customer, error) {
+	var resp repository.Customer
 	payload, err := service.q.GetCustomers(ctx, arg)
 	if err != nil {
-		return repository.Customer{}, err
+		if err == sql.ErrNoRows {
+			return resp, exception.NewBadRequestError(err.Error())
+		}
+		return resp, exception.NewInternalError(err.Error())
 	}
 
 	return payload, nil
 }
 
 func (service *CustomerServiceImpl) CreateCustomers(ctx context.Context, arg repository.CreateCustomersParams) (CreateCustomersResponse, error) {
+	var resp CreateCustomersResponse
 	err := service.q.CreateCustomers(ctx, arg)
 	if err != nil {
-		return CreateCustomersResponse{}, exception.NewNotFoundError(err.Error())
+		return resp, exception.NewNotFoundError(err.Error())
 	}
 
-	payload, err := service.q.GetCustomers(ctx, arg.ID)
+	payload, err := service.q.GetCustomers(ctx, arg.Email)
 	if err != nil {
-		return CreateCustomersResponse{}, exception.NewNotFoundError(err.Error())
+		return resp, exception.NewNotFoundError(err.Error())
 	}
 
 	return NewCustomerPayload(payload), nil
 }
 
 func (service *CustomerServiceImpl) CreateSession(ctx context.Context, arg repository.CreateSessionParams) (repository.Session, error) {
+	var resp repository.Session
 	err := service.q.CreateSession(ctx, arg)
 	if err != nil {
-		return repository.Session{}, err
+		return resp, err
 	}
 
 	payload, err := service.q.GetSession(ctx, arg.ID)
 	if err != nil {
-		return repository.Session{}, err
+		return resp, err
 	}
 	return payload, nil
 

@@ -74,3 +74,42 @@ func (q *Queries) GetTransaction(ctx context.Context, id string) (Transaction, e
 	)
 	return i, err
 }
+
+const listTransaction = `-- name: ListTransaction :many
+SELECT id, customer_id, product_name, price, bunga, jumlah_cicilan, tenor, admin_fee, created_at FROM ` + "`" + `transaction` + "`" + `
+WHERE customer_id = ?
+ORDER BY created_at
+`
+
+func (q *Queries) ListTransaction(ctx context.Context, customerID string) ([]Transaction, error) {
+	rows, err := q.db.QueryContext(ctx, listTransaction, customerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Transaction{}
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.CustomerID,
+			&i.ProductName,
+			&i.Price,
+			&i.Bunga,
+			&i.JumlahCicilan,
+			&i.Tenor,
+			&i.AdminFee,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

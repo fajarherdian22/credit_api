@@ -10,78 +10,81 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type NotFoundError struct {
+type AppError struct {
+	Code    int
+	Status  string
 	Message string
 }
 
-func NewNotFoundError(message string) *NotFoundError {
-	return &NotFoundError{Message: message}
+func (e *AppError) Error() string {
+	return e.Message
+}
+func NewAppError(code int, status, message string) *AppError {
+	return &AppError{Code: code, Status: status, Message: message}
 }
 
-func (e *NotFoundError) Error() string {
-	return e.Message
+func NewNotFoundError(message string) *AppError {
+	return NewAppError(http.StatusNotFound, "NOT FOUND", message)
+}
+
+func NewNotAuthError(message string) *AppError {
+	return NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", message)
+}
+
+func NewBadRequestError(message string) *AppError {
+	return NewAppError(http.StatusBadRequest, "BAD REQUEST", message)
+}
+
+func NewForbiddenError(message string) *AppError {
+	return NewAppError(http.StatusForbidden, "FORBIDDEN", message)
+}
+
+func NewInternalError(message string) *AppError {
+	return NewAppError(http.StatusInternalServerError, "INTERNAL SERVER ERRROR", message)
 }
 
 func ErrorHandler(c *gin.Context, err interface{}) {
 
-	if notFoundError(c, err) {
+	if handleAppError(c, err) {
 		return
 	}
 
-	if validationErrors(c, err) {
+	if handleValidationErrors(c, err) {
 		return
 	}
-
-	internalServerError(c, err)
 }
 
-func validationErrors(c *gin.Context, err interface{}) bool {
-	exception, ok := err.(validator.ValidationErrors)
+func handleAppError(c *gin.Context, err interface{}) bool {
+	appError, ok := err.(*AppError)
 	if ok {
-		c.Writer.Header().Set("Content-Type", "application/json")
-		c.Writer.WriteHeader(http.StatusBadRequest)
-
-		webResponse := web.WebResponse{
-			Code:   http.StatusBadRequest,
-			Data:   exception.Error(),
-			Status: "Bad Request",
-		}
-
-		helper.HandleEncodeWriteJson(c, webResponse)
+		sendErrorResponse(c, appError.Code, appError.Status, appError.Message)
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
-func notFoundError(c *gin.Context, err interface{}) bool {
-	exception, ok := err.(NotFoundError)
+func handleValidationErrors(c *gin.Context, err interface{}) bool {
+	validationErrs, ok := err.(validator.ValidationErrors)
 	if ok {
-		c.Writer.Header().Set("Content-Type", "application/json")
-		c.Writer.WriteHeader(http.StatusNotFound)
-
-		webResponse := web.WebResponse{
-			Code:   http.StatusNotFound,
-			Status: "NOT FOUND",
-			Data:   exception.Error,
-		}
-
-		helper.HandleEncodeWriteJson(c, webResponse)
+		sendErrorResponse(c, http.StatusBadRequest, "VALIDATION ERROR", validationErrs.Error())
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
-func internalServerError(c *gin.Context, err interface{}) {
+func sendErrorResponse(c *gin.Context, code int, status string, data interface{}) {
 	c.Writer.Header().Set("Content-Type", "application/json")
-	c.Writer.WriteHeader(http.StatusInternalServerError)
+	c.Writer.WriteHeader(code)
 
 	webResponse := web.WebResponse{
-		Code:   http.StatusInternalServerError,
-		Status: "INTERNAL SERVER ERROR",
-		Data:   err,
+		Code:   code,
+		Status: status,
+		Data:   data,
 	}
 
 	helper.HandleEncodeWriteJson(c, webResponse)
+}
+
+func ErrorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }

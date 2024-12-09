@@ -16,6 +16,7 @@ type Querier interface {
 	GetLimit(ctx context.Context, arg GetLimitParams) (float64, error)
 	GetSession(ctx context.Context, id string) (Session, error)
 	GetTransaction(ctx context.Context, id string) (Transaction, error)
+	ListTransaction(ctx context.Context, customerID string) ([]Transaction, error)
 }
 
 var _ Querier = (*Queries)(nil)

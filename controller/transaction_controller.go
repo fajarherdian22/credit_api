@@ -10,7 +10,6 @@ import (
 	"github.com/fajarherdian22/credit_bank/repository"
 	"github.com/fajarherdian22/credit_bank/service"
 	"github.com/fajarherdian22/credit_bank/token"
-	"github.com/fajarherdian22/credit_bank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -48,21 +47,24 @@ func createTransactionsPayload(req CreateTransactionsRequest, total service.Tota
 	}
 }
 
-func (controller *TransactionController) CreateTransaction(c *gin.Context) {
+func getPayload(c *gin.Context) *token.Payload {
 	payload, exists := c.Get("authorization_payload")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
+		exception.ErrorHandler(c, exception.NewNotAuthError("not authenticated"))
 	}
 	tokenPayload, ok := payload.(*token.Payload)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token payload"})
-		return
+		exception.ErrorHandler(c, exception.NewInternalError("failed to parse token payload"))
 	}
+	return tokenPayload
+}
+
+func (controller *TransactionController) CreateTransaction(c *gin.Context) {
 	var req CreateTransactionsRequest
+	tokenPayload := getPayload(c)
 	req.CustomerID = tokenPayload.CustomerID
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, util.ErrorResponse(err))
+		exception.ErrorHandler(c, exception.NewBadRequestError("bad request !"))
 		return
 	}
 	total := service.CalculateTotalPayment(req.Price, req.Tenor)
@@ -70,6 +72,23 @@ func (controller *TransactionController) CreateTransaction(c *gin.Context) {
 	arg := createTransactionsPayload(req, total)
 
 	payload, err := controller.TransactionService.CreateTransaction(c.Request.Context(), arg)
+	if err != nil {
+		exception.ErrorHandler(c, err)
+		return
+	}
+
+	WebResponse := web.WebResponse{
+		Code:   http.StatusOK,
+		Data:   payload,
+		Status: "OK",
+	}
+
+	helper.HandleEncodeWriteJson(c, WebResponse)
+}
+
+func (controller *TransactionController) ListTx(c *gin.Context) {
+	tokenPayload := getPayload(c)
+	payload, err := controller.TransactionService.ListTx(c, tokenPayload.CustomerID)
 	if err != nil {
 		exception.ErrorHandler(c, err)
 		return

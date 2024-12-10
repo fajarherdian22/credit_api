@@ -7,6 +7,7 @@ import (
 
 	"github.com/fajarherdian22/credit_bank/exception"
 	"github.com/fajarherdian22/credit_bank/repository"
+	"github.com/fajarherdian22/credit_bank/web"
 )
 
 type TransactionServiceImpl struct {
@@ -17,8 +18,8 @@ func NewTransactionService(q *repository.Queries) *TransactionServiceImpl {
 	return &TransactionServiceImpl{q: q}
 }
 
-func (service *TransactionServiceImpl) CreateTransaction(ctx context.Context, arg repository.CreateTransactionParams) (TransactionResponse, error) {
-	var resp TransactionResponse
+func (service *TransactionServiceImpl) CreateTransaction(ctx context.Context, arg repository.CreateTransactionParams) (web.TransactionResponse, error) {
+	var resp web.TransactionResponse
 	req := repository.GetLimitParams{
 		CustomerID: arg.CustomerID,
 		Tenor:      arg.Tenor,
@@ -26,7 +27,7 @@ func (service *TransactionServiceImpl) CreateTransaction(ctx context.Context, ar
 
 	limit, err := service.q.GetLimit(ctx, req)
 	if err != nil {
-		return resp, exception.NewNotFoundError(err.Error())
+		return resp, exception.NewNotFoundError("Doesn't have limit")
 	}
 
 	if limit < arg.Price {
@@ -36,15 +37,16 @@ func (service *TransactionServiceImpl) CreateTransaction(ctx context.Context, ar
 	if err := service.q.CreateTransaction(ctx, arg); err != nil {
 		return resp, exception.NewNotFoundError(err.Error())
 	}
+
 	payloadResp, err := service.q.GetTransaction(ctx, arg.ID)
 	if err != nil {
 		return resp, exception.NewNotFoundError(err.Error())
 	}
-	return NewTransactionResponse(payloadResp), nil
+	return web.NewTransactionResponse(payloadResp), nil
 }
 
-func (service *TransactionServiceImpl) ListTx(ctx context.Context, id string) ([]TransactionResponse, error) {
-	var resp []TransactionResponse
+func (service *TransactionServiceImpl) ListTx(ctx context.Context, id string) ([]web.TransactionResponse, error) {
+	var resp []web.TransactionResponse
 	payload, err := service.q.ListTransaction(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -52,5 +54,5 @@ func (service *TransactionServiceImpl) ListTx(ctx context.Context, id string) ([
 		}
 		return resp, exception.NewNotFoundError(err.Error())
 	}
-	return NewTransactionResponses(payload), nil
+	return web.NewTransactionResponses(payload), nil
 }

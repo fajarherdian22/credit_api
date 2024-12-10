@@ -9,6 +9,34 @@ import (
 	"context"
 )
 
+const generateLimit = `-- name: GenerateLimit :exec
+INSERT INTO loan_limit (
+    id,
+    customer_id,
+    tenor,
+    ` + "`" + `limit` + "`" + `
+) VALUES (
+    ?, ?, ?, ?
+)
+`
+
+type GenerateLimitParams struct {
+	ID         string  `json:"id"`
+	CustomerID string  `json:"customer_id"`
+	Tenor      int32   `json:"tenor"`
+	Limit      float64 `json:"limit"`
+}
+
+func (q *Queries) GenerateLimit(ctx context.Context, arg GenerateLimitParams) error {
+	_, err := q.db.ExecContext(ctx, generateLimit,
+		arg.ID,
+		arg.CustomerID,
+		arg.Tenor,
+		arg.Limit,
+	)
+	return err
+}
+
 const getLimit = `-- name: GetLimit :one
 SELECT ` + "`" + `limit` + "`" + ` FROM loan_limit
 WHERE customer_id = ? AND tenor = ?

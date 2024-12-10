@@ -15,7 +15,7 @@ type PasetoMaker struct {
 
 func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
-		return nil, fmt.Errorf("The symmetric key must be samed %d", chacha20poly1305.KeySize)
+		return nil, fmt.Errorf("the symmetric key must be samed %d", chacha20poly1305.KeySize)
 	}
 	maker := &PasetoMaker{
 		paseto:       *paseto.NewV2(),
@@ -43,7 +43,6 @@ func (maker *PasetoMaker) VerifiyToken(token string) (*Payload, error) {
 
 	err = payload.Valid()
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	return payload, nil

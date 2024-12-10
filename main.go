@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 
 	"github.com/fajarherdian22/credit_bank/controller"
@@ -29,11 +31,16 @@ func main() {
 		fmt.Printf("cannot generate token %s", err.Error())
 	}
 
+	validate := validator.New()
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("ProductName", util.ProductNameValidator)
+	}
+
 	custService := service.NewCustomerService(repo)
-	custController := controller.NewCustomerController(custService, tokenMaker)
+	custController := controller.NewCustomerController(custService, tokenMaker, validate)
 
 	transactionService := service.NewTransactionService(repo)
-	transactionController := controller.NewTransactionController(transactionService, tokenMaker)
+	transactionController := controller.NewTransactionController(transactionService, tokenMaker, validate)
 
 	router := gin.New()
 

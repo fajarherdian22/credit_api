@@ -1,4 +1,4 @@
-package service
+package web
 
 import (
 	"time"
@@ -6,23 +6,27 @@ import (
 	"github.com/fajarherdian22/credit_bank/repository"
 )
 
-type TotalPayment struct {
-	Bunga         float64
-	JumlahCicilan float64
-	AdminFee      float64
+type CustomerResponse struct {
+	ID       string `json:"id"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
 }
 
-func CalculateTotalPayment(price float64, tenor int32) TotalPayment {
-	bunga := 0.1
-	total := price + (price * bunga)
-	jumlahCicilan := total / float64(tenor)
-	adminFee := jumlahCicilan * 0.15
-
-	return TotalPayment{
-		Bunga:         bunga,
-		JumlahCicilan: jumlahCicilan,
-		AdminFee:      adminFee,
+func NewCustomerResponse(customer repository.Customer) CustomerResponse {
+	return CustomerResponse{
+		ID:       customer.ID,
+		FullName: customer.FullName,
+		Email:    customer.Email,
 	}
+}
+
+type LoginUserResponse struct {
+	SessionID             string           `json:"session_id"`
+	AccessToken           string           `json:"access_token"`
+	AccessTokenExpiresAt  time.Time        `json:"access_token_expires_at"`
+	RefreshToken          string           `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time        `json:"refresh_token_expires_at"`
+	Customer              CustomerResponse `json:"customer"`
 }
 
 type TransactionResponse struct {

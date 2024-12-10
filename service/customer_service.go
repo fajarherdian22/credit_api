@@ -7,6 +7,7 @@ import (
 
 	"github.com/fajarherdian22/credit_bank/exception"
 	"github.com/fajarherdian22/credit_bank/repository"
+	"github.com/go-sql-driver/mysql"
 )
 
 type CustomerServiceImpl struct {
@@ -50,7 +51,6 @@ func (service *CustomerServiceImpl) GetCustomer(ctx context.Context, arg string)
 		}
 		return resp, exception.NewInternalError(err.Error())
 	}
-
 	return payload, nil
 }
 
@@ -58,6 +58,14 @@ func (service *CustomerServiceImpl) CreateCustomers(ctx context.Context, arg rep
 	var resp CreateCustomersResponse
 	err := service.q.CreateCustomers(ctx, arg)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			switch mysqlErr.Number {
+			case 1062:
+				return resp, exception.NewForbiddenError("Duplicate entry error")
+			case 1451:
+				return resp, exception.NewBadRequestError(mysqlErr.Message)
+			}
+		}
 		return resp, exception.NewNotFoundError(err.Error())
 	}
 
@@ -81,5 +89,16 @@ func (service *CustomerServiceImpl) CreateSession(ctx context.Context, arg repos
 		return resp, err
 	}
 	return payload, nil
+}
 
+func (service *CustomerServiceImpl) GetSession(ctx context.Context, id string) (repository.Session, error) {
+	var resp repository.Session
+	payload, err := service.q.GetSession(ctx, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return resp, exception.NewNotFoundError(err.Error())
+		}
+		return resp, err
+	}
+	return payload, nil
 }

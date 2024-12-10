@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/fajarherdian22/credit_bank/helper"
-	"github.com/fajarherdian22/credit_bank/model/web"
+	"github.com/fajarherdian22/credit_bank/web"
 	"github.com/gin-gonic/gin"
 
 	"github.com/go-playground/validator/v10"

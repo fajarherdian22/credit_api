@@ -41,3 +41,4 @@ CREATE TABLE `payment_details` (
 ALTER TABLE `loan_limit` ADD FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`);
 ALTER TABLE `transaction` ADD FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`);
 ALTER TABLE `payment_details` ADD FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`);
+ALTER TABLE `loan_limit` ADD CONSTRAINT unique_customer_id_tenor UNIQUE (`customer_id`, `tenor`);

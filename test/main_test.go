@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"testing"
 
@@ -25,13 +26,36 @@ func TestDb(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, payload)
 
-	arg := repository.GenerateLimitParams{
-		ID:         uuid.NewString(),
-		CustomerID: "3c5b6f7b-60ab-43cc-ae3f-f05a2fba57e5",
-		Tenor:      4,
-		Limit:      700000,
+	// arg := repository.GenerateLimitParams{
+	// 	ID:         uuid.NewString(),
+	// 	CustomerID: "3c5b6f7b-60ab-43cc-ae3f-f05a2fba57e5",
+	// 	Tenor:      4,
+	// 	Limit:      700000,
+	// }
+	// err = repo.GenerateLimit(context.Background(), arg)
+	// require.NoError(t, err)
+
+	for i := 1; i <= 4; i++ {
+		salary := float64(10000000)
+		switch i {
+		case 1:
+			salary = salary * 0.15
+		case 2:
+			salary = salary * 0.2
+		case 3:
+			salary = salary * 0.25
+		case 4:
+			salary = salary * 0.3
+		}
+		arg := repository.GenerateLimitParams{
+			ID:         uuid.NewString(),
+			CustomerID: "d81e05f9-279d-493c-9a12-a6c331436b91",
+			Tenor:      int32(i),
+			Limit:      salary,
+		}
+		err = repo.GenerateLimit(context.Background(), arg)
+		fmt.Print(err.Error())
+		require.NoError(t, err)
 	}
-	err = repo.GenerateLimit(context.Background(), arg)
-	require.NoError(t, err)
 
 }

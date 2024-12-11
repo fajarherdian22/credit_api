@@ -82,3 +82,15 @@ func (q *Queries) GetCustomers(ctx context.Context, email string) (Customer, err
 	)
 	return i, err
 }
+
+const getSalary = `-- name: GetSalary :one
+SELECT gaji FROM customers
+WHERE id = ? LIMIT 1
+`
+
+func (q *Queries) GetSalary(ctx context.Context, id string) (float64, error) {
+	row := q.db.QueryRowContext(ctx, getSalary, id)
+	var gaji float64
+	err := row.Scan(&gaji)
+	return gaji, err
+}

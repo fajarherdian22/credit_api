@@ -42,16 +42,22 @@ func main() {
 	transactionService := service.NewTransactionService(repo)
 	transactionController := controller.NewTransactionController(transactionService, tokenMaker, validate)
 
+	loanService := service.NewLoanService(repo)
+	loanController := controller.NewLoanController(loanService, tokenMaker)
+
 	router := gin.New()
 
 	r := router.Group("/api/")
 	r.POST("/customers/create", custController.CreateCustomersUser)
 	r.POST("/customers/login", custController.LoginCustomers)
+	r.POST("/token/refresh", custController.RenewAccessToken)
+
 	authGroup := r.Group("/")
 
 	authGroup.Use(middleware.AuthMiddleware(tokenMaker))
 	authGroup.POST("/customers/transaction", transactionController.CreateTransaction)
 	authGroup.GET("/customers/listtx", transactionController.ListTx)
+	authGroup.GET("request/loan", loanController.GenerateLimit)
 
 	err = router.Run(":8080")
 	if err != nil {

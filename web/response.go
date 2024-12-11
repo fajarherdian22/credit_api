@@ -61,3 +61,25 @@ func NewTransactionResponses(transaction []repository.Transaction) []Transaction
 	}
 	return txResponses
 }
+
+type LimitResponse struct {
+	Tenor int32   `json:"tenor"`
+	Limit float64 `json:"limit"`
+}
+
+type GenerateLimitResponse struct {
+	CustomerID string          `json:"customer_id"`
+	Email      string          `json:"email"`
+	Limits     []LimitResponse `json:"limits"`
+}
+
+func NewLimitResponses(limits []repository.GetCustomerLimitRow) []LimitResponse {
+	var lmResponses []LimitResponse
+	for _, lm := range limits {
+		lmResponses = append(lmResponses, LimitResponse{
+			Tenor: lm.Tenor,
+			Limit: lm.Limit,
+		})
+	}
+	return lmResponses
+}

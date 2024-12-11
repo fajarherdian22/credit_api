@@ -37,6 +37,40 @@ func (q *Queries) GenerateLimit(ctx context.Context, arg GenerateLimitParams) er
 	return err
 }
 
+const getCustomerLimit = `-- name: GetCustomerLimit :many
+SELECT tenor, ` + "`" + `limit` + "`" + ` FROM loan_limit
+where customer_id  = ?
+order by tenor
+`
+
+type GetCustomerLimitRow struct {
+	Tenor int32   `json:"tenor"`
+	Limit float64 `json:"limit"`
+}
+
+func (q *Queries) GetCustomerLimit(ctx context.Context, customerID string) ([]GetCustomerLimitRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerLimit, customerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCustomerLimitRow{}
+	for rows.Next() {
+		var i GetCustomerLimitRow
+		if err := rows.Scan(&i.Tenor, &i.Limit); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLimit = `-- name: GetLimit :one
 SELECT ` + "`" + `limit` + "`" + ` FROM loan_limit
 WHERE customer_id = ? AND tenor = ?

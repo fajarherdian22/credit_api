@@ -2,7 +2,6 @@ package helper
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,6 @@ func HandleEncodeWriteJson(c *gin.Context, WebResponse any) {
 
 // Decode Request Body JSON
 func HandleDecodeReqJson(c *gin.Context, dataStruct any) {
-	fmt.Println(c.Request.Body)
 	decoder := json.NewDecoder(c.Request.Body)
 	err := decoder.Decode(dataStruct)
 	IsError(err)

@@ -26,18 +26,6 @@ func NewTransactionController(TransactionService *service.TransactionServiceImpl
 	}
 }
 
-func getPayload(c *gin.Context) *token.Payload {
-	payload, exists := c.Get("authorization_payload")
-	if !exists {
-		exception.ErrorHandler(c, exception.NewNotAuthError("not authenticated"))
-	}
-	tokenPayload, ok := payload.(*token.Payload)
-	if !ok {
-		exception.ErrorHandler(c, exception.NewInternalError("failed to parse token payload"))
-	}
-	return tokenPayload
-}
-
 func CalculateTotalPayment(price float64, tenor int32) web.TotalPayment {
 	bunga := 0.1
 	total := price + (price * bunga)
@@ -53,7 +41,12 @@ func CalculateTotalPayment(price float64, tenor int32) web.TotalPayment {
 
 func (controller *TransactionController) CreateTransaction(c *gin.Context) {
 	var req web.CreateTransactionsRequest
-	tokenPayload := getPayload(c)
+	tokenPayload, err := token.GetPayload(c)
+	if err != nil {
+		exception.ErrorHandler(c, err)
+		return
+	}
+
 	req.CustomerID = tokenPayload.CustomerID
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -86,7 +79,11 @@ func (controller *TransactionController) CreateTransaction(c *gin.Context) {
 }
 
 func (controller *TransactionController) ListTx(c *gin.Context) {
-	tokenPayload := getPayload(c)
+	tokenPayload, err := token.GetPayload(c)
+	if err != nil {
+		exception.ErrorHandler(c, err)
+		return
+	}
 	payload, err := controller.TransactionService.ListTx(c, tokenPayload.CustomerID)
 	if err != nil {
 		exception.ErrorHandler(c, err)

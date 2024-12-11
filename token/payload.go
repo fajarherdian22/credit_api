@@ -4,6 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/fajarherdian22/credit_bank/exception"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -37,4 +39,18 @@ func (payload *Payload) Valid() error {
 		return ErrExpired
 	}
 	return nil
+}
+
+func GetPayload(c *gin.Context) (*Payload, error) {
+	payload, exists := c.Get("authorization_payload")
+	if !exists {
+		return nil, exception.NewNotAuthError("not authenticated")
+	}
+
+	tokenPayload, ok := payload.(*Payload)
+	if !ok {
+		return nil, exception.NewInternalError("failed to parse token payload")
+	}
+
+	return tokenPayload, nil
 }

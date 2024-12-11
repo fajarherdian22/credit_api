@@ -11,3 +11,8 @@ INSERT INTO loan_limit (
 ) VALUES (
     ?, ?, ?, ?
 );
+
+-- name: GetCustomerLimit :many
+SELECT tenor, `limit` FROM loan_limit
+where customer_id  = ?
+order by tenor;

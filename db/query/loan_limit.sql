@@ -21,3 +21,8 @@ order by tenor;
 UPDATE loan_limit
 SET `limit` = `limit` - ?
 WHERE customer_id = ? AND `limit` >= ?;
+
+-- name: IncreaseLimit :exec
+UPDATE loan_limit
+SET `limit` = `limit` + ?
+WHERE customer_id = ?

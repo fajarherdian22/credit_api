@@ -8,3 +8,8 @@ INSERT INTO `payment_details` (
 ) VALUES (
     ?, ?, ?, ?, ?
 )
+
+-- name: UpdatePayment :exec
+UPDATE payment_details
+SET is_paid = true
+WHERE id = ? AND is_paid = false;

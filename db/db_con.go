@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,8 +12,6 @@ func ConDB(config string) *sql.DB {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Connected")
-
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(60 * time.Minute)

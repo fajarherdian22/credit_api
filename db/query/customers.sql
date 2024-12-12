@@ -17,4 +17,8 @@ INSERT INTO customers (
 
 -- name: GetCustomers :one
 SELECT * FROM customers
+WHERE email = ? LIMIT 1;
+
+-- name: GetSalary :one
+SELECT gaji FROM customers
 WHERE id = ? LIMIT 1;

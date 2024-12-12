@@ -9,6 +9,68 @@ import (
 	"context"
 )
 
+const generateLimit = `-- name: GenerateLimit :exec
+INSERT INTO loan_limit (
+    id,
+    customer_id,
+    tenor,
+    ` + "`" + `limit` + "`" + `
+) VALUES (
+    ?, ?, ?, ?
+)
+`
+
+type GenerateLimitParams struct {
+	ID         string  `json:"id"`
+	CustomerID string  `json:"customer_id"`
+	Tenor      int32   `json:"tenor"`
+	Limit      float64 `json:"limit"`
+}
+
+func (q *Queries) GenerateLimit(ctx context.Context, arg GenerateLimitParams) error {
+	_, err := q.db.ExecContext(ctx, generateLimit,
+		arg.ID,
+		arg.CustomerID,
+		arg.Tenor,
+		arg.Limit,
+	)
+	return err
+}
+
+const getCustomerLimit = `-- name: GetCustomerLimit :many
+SELECT tenor, ` + "`" + `limit` + "`" + ` FROM loan_limit
+where customer_id  = ?
+order by tenor
+`
+
+type GetCustomerLimitRow struct {
+	Tenor int32   `json:"tenor"`
+	Limit float64 `json:"limit"`
+}
+
+func (q *Queries) GetCustomerLimit(ctx context.Context, customerID string) ([]GetCustomerLimitRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerLimit, customerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCustomerLimitRow{}
+	for rows.Next() {
+		var i GetCustomerLimitRow
+		if err := rows.Scan(&i.Tenor, &i.Limit); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLimit = `-- name: GetLimit :one
 SELECT ` + "`" + `limit` + "`" + ` FROM loan_limit
 WHERE customer_id = ? AND tenor = ?
@@ -24,4 +86,21 @@ func (q *Queries) GetLimit(ctx context.Context, arg GetLimitParams) (float64, er
 	var limit float64
 	err := row.Scan(&limit)
 	return limit, err
+}
+
+const reduceLimit = `-- name: ReduceLimit :exec
+UPDATE loan_limit
+SET ` + "`" + `limit` + "`" + ` = ` + "`" + `limit` + "`" + ` - ?
+WHERE customer_id = ? AND ` + "`" + `limit` + "`" + ` >= ?
+`
+
+type ReduceLimitParams struct {
+	Limit      float64 `json:"limit"`
+	CustomerID string  `json:"customer_id"`
+	Limit_2    float64 `json:"limit_2"`
+}
+
+func (q *Queries) ReduceLimit(ctx context.Context, arg ReduceLimitParams) error {
+	_, err := q.db.ExecContext(ctx, reduceLimit, arg.Limit, arg.CustomerID, arg.Limit_2)
+	return err
 }

@@ -15,4 +15,9 @@ INSERT INTO `transaction` (
 
 -- name: GetTransaction :one
 SELECT * FROM `transaction`
-WHERE id = ?
+WHERE id = ?;
+
+-- name: ListTransaction :many
+SELECT * FROM `transaction`
+WHERE customer_id = ?
+ORDER BY created_at;

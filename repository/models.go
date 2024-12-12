@@ -33,7 +33,20 @@ type PaymentDetail struct {
 	ID            string    `json:"id"`
 	TransactionID string    `json:"transaction_id"`
 	Amount        float64   `json:"amount"`
-	PaymentTime   time.Time `json:"payment_time"`
+	DueDate       time.Time `json:"due_date"`
+	IsPaid        bool      `json:"is_paid"`
+}
+
+type Session struct {
+	ID           string    `json:"id"`
+	Email        string    `json:"email"`
+	CustomerID   string    `json:"customer_id"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type Transaction struct {

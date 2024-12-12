@@ -61,11 +61,11 @@ func (q *Queries) CreateCustomers(ctx context.Context, arg CreateCustomersParams
 
 const getCustomers = `-- name: GetCustomers :one
 SELECT id, nik, hashed_password, email, full_name, legal_name, tempat_lahir, tanggal_lahir, gaji, photo_ktp, foto_selfie FROM customers
-WHERE id = ? LIMIT 1
+WHERE email = ? LIMIT 1
 `
 
-func (q *Queries) GetCustomers(ctx context.Context, id string) (Customer, error) {
-	row := q.db.QueryRowContext(ctx, getCustomers, id)
+func (q *Queries) GetCustomers(ctx context.Context, email string) (Customer, error) {
+	row := q.db.QueryRowContext(ctx, getCustomers, email)
 	var i Customer
 	err := row.Scan(
 		&i.ID,
@@ -81,4 +81,16 @@ func (q *Queries) GetCustomers(ctx context.Context, id string) (Customer, error)
 		&i.FotoSelfie,
 	)
 	return i, err
+}
+
+const getSalary = `-- name: GetSalary :one
+SELECT gaji FROM customers
+WHERE id = ? LIMIT 1
+`
+
+func (q *Queries) GetSalary(ctx context.Context, id string) (float64, error) {
+	row := q.db.QueryRowContext(ctx, getSalary, id)
+	var gaji float64
+	err := row.Scan(&gaji)
+	return gaji, err
 }

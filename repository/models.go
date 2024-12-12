@@ -33,7 +33,8 @@ type PaymentDetail struct {
 	ID            string    `json:"id"`
 	TransactionID string    `json:"transaction_id"`
 	Amount        float64   `json:"amount"`
-	PaymentTime   time.Time `json:"payment_time"`
+	DueDate       time.Time `json:"due_date"`
+	IsPaid        bool      `json:"is_paid"`
 }
 
 type Session struct {

@@ -87,3 +87,20 @@ func (q *Queries) GetLimit(ctx context.Context, arg GetLimitParams) (float64, er
 	err := row.Scan(&limit)
 	return limit, err
 }
+
+const reduceLimit = `-- name: ReduceLimit :exec
+UPDATE loan_limit
+SET ` + "`" + `limit` + "`" + ` = ` + "`" + `limit` + "`" + ` - ?
+WHERE customer_id = ? AND ` + "`" + `limit` + "`" + ` >= ?
+`
+
+type ReduceLimitParams struct {
+	Limit      float64 `json:"limit"`
+	CustomerID string  `json:"customer_id"`
+	Limit_2    float64 `json:"limit_2"`
+}
+
+func (q *Queries) ReduceLimit(ctx context.Context, arg ReduceLimitParams) error {
+	_, err := q.db.ExecContext(ctx, reduceLimit, arg.Limit, arg.CustomerID, arg.Limit_2)
+	return err
+}

@@ -30,7 +30,7 @@ func CalculateTotalPayment(price float64, tenor int32) web.TotalPayment {
 	bunga := 0.1
 	total := price + (price * bunga)
 	jumlahCicilan := total / float64(tenor)
-	adminFee := jumlahCicilan * 0.15
+	adminFee := jumlahCicilan * 0.05
 
 	return web.TotalPayment{
 		Bunga:         bunga,

@@ -43,6 +43,10 @@ func NewInternalError(message string) *AppError {
 	return NewAppError(http.StatusInternalServerError, "INTERNAL SERVER ERRROR", message)
 }
 
+func NewManyRequest(message string) *AppError {
+	return NewAppError(http.StatusTooManyRequests, "TO MANY REQUEST !", message)
+}
+
 func ErrorHandler(c *gin.Context, err interface{}) {
 
 	if handleAppError(c, err) {

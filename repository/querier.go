@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	CreateCustomers(ctx context.Context, arg CreateCustomersParams) error
+	CreatePayment(ctx context.Context, arg CreatePaymentParams) error
 	CreateSession(ctx context.Context, arg CreateSessionParams) error
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) error
 	GenerateLimit(ctx context.Context, arg GenerateLimitParams) error
@@ -20,6 +21,7 @@ type Querier interface {
 	GetSession(ctx context.Context, id string) (Session, error)
 	GetTransaction(ctx context.Context, id string) (Transaction, error)
 	ListTransaction(ctx context.Context, customerID string) ([]Transaction, error)
+	ReduceLimit(ctx context.Context, arg ReduceLimitParams) error
 }
 
 var _ Querier = (*Queries)(nil)

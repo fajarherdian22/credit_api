@@ -16,3 +16,8 @@ INSERT INTO loan_limit (
 SELECT tenor, `limit` FROM loan_limit
 where customer_id  = ?
 order by tenor;
+
+-- name: ReduceLimit :exec
+UPDATE loan_limit
+SET `limit` = `limit` - ?
+WHERE customer_id = ? AND `limit` >= ?;

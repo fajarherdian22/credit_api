@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -39,17 +41,25 @@ func main() {
 	custService := service.NewCustomerService(repo)
 	custController := controller.NewCustomerController(custService, tokenMaker, validate)
 
-	transactionService := service.NewTransactionService(repo)
+	transactionService := service.NewTransactionService(dbCon)
 	transactionController := controller.NewTransactionController(transactionService, tokenMaker, validate)
 
 	loanService := service.NewLoanService(repo)
 	loanController := controller.NewLoanController(loanService, tokenMaker)
 
 	router := gin.New()
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"POST", "GET"},
+		AllowHeaders:    []string{"Content-Type", "Origin"},
+		ExposeHeaders:   []string{"Content-Length"},
+		MaxAge:          12 * time.Hour,
+	}))
+	router.Use(gin.Recovery())
 
 	r := router.Group("/api/")
 	r.POST("/customers/create", custController.CreateCustomersUser)
-	r.POST("/customers/login", custController.LoginCustomers)
+	r.POST("/customers/login", middleware.RateLimiter(), custController.LoginCustomers)
 	r.POST("/token/refresh", custController.RenewAccessToken)
 
 	authGroup := r.Group("/")

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-migrate/migrate"
 	"github.com/rs/zerolog/log"
 
 	"github.com/fajarherdian22/credit_bank/controller"
@@ -19,11 +20,25 @@ import (
 	"github.com/fajarherdian22/credit_bank/util"
 )
 
+func runDBMigration(migrationURL string, DBSource string) {
+	migration, err := migrate.New(migrationURL, DBSource)
+	if err != nil {
+		log.Fatal().AnErr("Cannot create new migrate instance : ", err)
+	}
+	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal().AnErr("failed to run migrate up : ", err)
+	}
+
+	log.Info().Msg("db migration successfully")
+}
+
 func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal().AnErr("Cannot load config :", err)
 	}
+
+	runDBMigration(config.MigrationURL, config.DBSource)
 
 	dbCon := db.ConDB(config.DBSource)
 	repo := repository.New(dbCon)

@@ -22,40 +22,66 @@ func TestDb(t *testing.T) {
 
 	dbCon := db.ConDB(config.DBSource)
 	repo := repository.New(dbCon)
-	payload, err := repo.GetCustomers(context.Background(), "Budi@gmail.com")
+
+	payload, err := repo.GetCustomers(context.Background(), "budi@gmail.com")
 	require.NoError(t, err)
 	require.NotEmpty(t, payload)
 
-	// arg := repository.GenerateLimitParams{
-	// 	ID:         uuid.NewString(),
-	// 	CustomerID: "3c5b6f7b-60ab-43cc-ae3f-f05a2fba57e5",
-	// 	Tenor:      4,
-	// 	Limit:      700000,
-	// }
-	// err = repo.GenerateLimit(context.Background(), arg)
-	// require.NoError(t, err)
-
 	for i := 1; i <= 4; i++ {
-		salary := float64(10000000)
+		salary := float64(0)
 		switch i {
 		case 1:
-			salary = salary * 0.15
+			salary = 100000
 		case 2:
-			salary = salary * 0.2
+			salary = 200000
 		case 3:
-			salary = salary * 0.25
+			salary = 500000
 		case 4:
-			salary = salary * 0.3
+			salary = 700000
 		}
+
 		arg := repository.GenerateLimitParams{
 			ID:         uuid.NewString(),
-			CustomerID: "d81e05f9-279d-493c-9a12-a6c331436b91",
+			CustomerID: payload.ID,
 			Tenor:      int32(i),
 			Limit:      salary,
 		}
-		err = repo.GenerateLimit(context.Background(), arg)
-		fmt.Print(err.Error())
-		require.NoError(t, err)
+
+		err := repo.GenerateLimit(context.Background(), arg)
+		if err != nil {
+			fmt.Println("Error inserting limit:", err.Error())
+			require.NoError(t, err)
+		}
 	}
 
+	payload2, err := repo.GetCustomers(context.Background(), "anisa@gmail.com")
+	require.NoError(t, err)
+	require.NotEmpty(t, payload2)
+
+	for i := 1; i <= 4; i++ {
+		salary := float64(0)
+		switch i {
+		case 1:
+			salary = 1000000
+		case 2:
+			salary = 1200000
+		case 3:
+			salary = 1500000
+		case 4:
+			salary = 2000000
+		}
+
+		arg := repository.GenerateLimitParams{
+			ID:         uuid.NewString(),
+			CustomerID: payload2.ID,
+			Tenor:      int32(i),
+			Limit:      salary,
+		}
+
+		err := repo.GenerateLimit(context.Background(), arg)
+		if err != nil {
+			fmt.Println("Error inserting limit:", err.Error())
+			require.NoError(t, err)
+		}
+	}
 }

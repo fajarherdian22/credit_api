@@ -41,10 +41,6 @@ This project is a GoLang-based application for managing credit bank operations. 
 4. Push to the branch (`git push origin feature-branch`).
 5. Create a new Pull Request.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Contact
 
-For any inquiries, please contact [yourname@domain.com](mailto:yourname@domain.com).
+For any inquiries, please contact [yourname@domain.com](mailto:fajarherdian22@gmail.com).

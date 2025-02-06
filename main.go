@@ -63,6 +63,7 @@ func main() {
 	loanController := controller.NewLoanController(loanService, tokenMaker)
 
 	router := gin.New()
+
 	router.Use(cors.New(cors.Config{
 		AllowAllOrigins: true,
 		AllowMethods:    []string{"POST", "GET"},
